@@ -1,0 +1,73 @@
+{% extends 'plantilla.html' %}}
+{% block title %}
+Inicio
+{% endblock %}
+
+{% block nombrePagina %}
+Bienvenido a NombreApp
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid mt-4 mb-4" align="center">
+    <div class="row" >
+        <div class="col-xs-7 float-left">
+            <label>Seleccione un algoritmo: </label>
+        </div>
+        <div class="col-xs-5 float-right">
+            <select name="algoritmos" id="algoritmos">
+                <option value="id3">Id3</option>
+                <option value="apriori">Apriori</option>
+                <option value="kmeans">K-Means</option>
+                <option value="knn">KNN</option>
+                <option value="fpgrouth">FP-Grouth</option>
+                <option value="regresion">Regresión</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-7 float-left">
+            <label>Seleccione un Dataset: </label>
+        </div>
+        <div class="col-xs-5 float-right">
+            <select name="dataset" id="dataset">
+                <option value="1">Supermercado</option>
+                <option value="2">Cancer</option>
+                <option value="3">Iris</option>
+                <option value="4">Peliculas</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-7 float-left">
+            <label>Cargar DataSet: </label>
+        </div>
+        <div class="col-xs-5 float-right">
+            <button class="btn btn-alert">Cargar (opcional)</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-7 float-left">
+            <label>Comparar con: </label>
+        </div>
+        <div class="col-xs-5 float-right">
+            <select name="algoritmos2" id="algoritmos2">
+                <option value="id3">Id3</option>
+                <option value="apriori">Apriori</option>
+                <option value="kmeans">K-Means</option>
+                <option value="knn">KNN</option>
+                <option value="fpgrouth">FP-Grouth</option>
+                <option value="regresion">Regresión</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-7 float-left">
+            <label>Elegir Red Neuronal: </label>
+        </div>
+        <div class="col-xs-5 float-right">
+            <button>Generar</button>
+        </div>
+    </div>
+    <button class="btn-block btn btn-alert">Generar Resultados</button>
+</div>
+{% endblock %}
