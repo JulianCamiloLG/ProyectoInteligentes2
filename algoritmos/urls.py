@@ -7,5 +7,8 @@ app_name = 'algoritmos'
 
 urlpatterns = [
     path('', home, name="index"),
+    path('elecciones/', elecciones, name="elecciones"),
+    path('resultados/', resultados, name="resultados"),
+    path('neuronal/', neuronal, name="neuronal"),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
