@@ -17,12 +17,20 @@ Elija las opciones que más se le acomoden
             </div>
             <div class="col-xs-5 float-right">
                 <select name="algoritmoPrincipal" id="algoritmoPrincipal" >
-                    <option value="ID3">Id3</option>
-                    <option value="Apriori">Apriori</option>
-                    <option value="Kmeans">K-Means</option>
-                    <option value="Knn">KNN</option>
-                    <option value="FP-Grouth">FP-Grouth</option>
-                    <option value="Regresion Lineal">Regresión</option>
+                    <optgroup label="Clasificadores supervisados">
+                        <option value="id3">Id3</option>
+                        <option value="Bayes">Naive Bayes</option>
+                        <option value="Kmeans">K-Means</option>
+                        <option value="Knn">KNN</option>
+                        <option value="regresion">Regresión Lineal</option>
+                    </optgroup>
+                    <optgroup label="Reglas de Asociaciones">
+                        <option value="Apriori">Apriori</option>
+                        <option value="FP-Grouth">FP-Grouth</option>
+                    </optgroup>
+                    <optgroup label="Markov">
+                        <option value="hmm">Modelos ocultos de Markov</option>
+                    </optgroup>
                 </select>
             </div>
         </div>
@@ -32,10 +40,23 @@ Elija las opciones que más se le acomoden
             </div>
             <div class="col-xs-5 float-right">
                 <select name="dataset" id="dataset">
-                    <option value="1">Supermercado</option>
-                    <option value="2">Cancer</option>
-                    <option value="3">Iris</option>
-                    <option value="4">Peliculas</option>
+                    <optgroup label="Clasificadores Supervisados">
+                        <option value="1">Vino</option>
+                        <option value="2">Cancer de Máma</option>
+                        <option value="3">Iris</option>
+                        <option value="4">Diabetes</option>
+                        <option value="5">Imagenes</option>
+                        <option value="6">SVM</option>
+                    </optgroup>
+                    <optgroup label="Reglas de asociación">
+                        <option value="7">Supermercado</option>
+                        <option value="8">Tienda de comestibles</option>
+                    </optgroup>
+                    <optgroup label="Reglas de asociación">
+                        <option value="7">Supermercado</option>
+                        <option value="8">Tienda de comestibles</option>
+                    </optgroup>
+
                 </select>
             </div>
         </div>
@@ -53,13 +74,23 @@ Elija las opciones que más se le acomoden
             </div>
             <div class="col-xs-5 float-right">
                 <select name="algoritmoComparar" id="algoritmoComparar">
-                    <option value="Ninguno">No comparar</option>
-                    <option value="ID3">Id3</option>
-                    <option value="Apriori">Apriori</option>
-                    <option value="Kmeans">K-Means</option>
-                    <option value="Knn">KNN</option>
-                    <option value="FP-Grouth">FP-Grouth</option>
-                    <option value="Regresion Lineal">Regresión</option>
+                    <optgroup label="No comparar">
+                        <option value="Ninguno">No comparar</option>
+                    </optgroup>
+                    <optgroup label="Clasificadores supervisados">
+                        <option value="id3">Id3</option>
+                        <option value="Bayes">Naive Bayes</option>
+                        <option value="Kmeans">K-Means</option>
+                        <option value="Knn">KNN</option>
+                        <option value="regresion">Regresión Lineal</option>
+                    </optgroup>
+                    <optgroup label="Reglas de Asociaciones">
+                        <option value="Apriori">Apriori</option>
+                        <option value="FP-Grouth">FP-Grouth</option>
+                    </optgroup>
+                    <optgroup label="Markov">
+                        <option value="hmm">Modelos ocultos de Markov</option>
+                    </optgroup>
                 </select>
             </div>
         </div>
