@@ -29,6 +29,14 @@ def resultados(request):
             context = regresionLineal(idDataset, True)
         elif algoritmoP == 'apriori':
             context = Apriori(idDataset, True)
+        elif algoritmoP == 'hmm':
+            context = markov(idDataset, True)
+        elif algoritmoP == 'svm':
+            context = Svm(idDataset, True)
+        elif algoritmoP == 'pca':
+            context = pca(idDataset, True)
+        elif algoritmoP == 'fp':
+            context = fpgrouth(idDataset, True)
 
         if algoritmoC == 'Bayes':
             context2 = bayesA(idDataset, False)
@@ -44,6 +52,18 @@ def resultados(request):
             context.update(context2)
         elif algoritmoC == 'apriori':
             context2 = Apriori(idDataset, False)
+            context.update(context2)
+        elif algoritmoC == 'hmm':
+            context2 = markov(idDataset, False)
+            context.update(context2)
+        elif algoritmoC == 'svm':
+            context2 = Svm(idDataset, False)
+            context.update(context2)
+        elif algoritmoC == 'pca':
+            context2 = pca(idDataset, False)
+            context.update(context2)
+        elif algoritmoC == 'fp':
+            context2 = fpgrouth(idDataset, False)
             context.update(context2)
 
         return render(request, 'resultados.html', context)

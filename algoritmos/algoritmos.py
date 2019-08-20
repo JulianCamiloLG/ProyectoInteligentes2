@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn import datasets, linear_model
+from sklearn import datasets, linear_model, svm, decomposition
 from sklearn.cluster import KMeans
 from sklearn.naive_bayes import GaussianNB
 from sklearn import metrics
@@ -13,8 +13,9 @@ from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, r2_score
 import pandas as pd
 from mlxtend.preprocessing import OnehotTransactions
-from mlxtend.frequent_patterns import apriori
-from mlxtend.frequent_patterns import association_rules
+from mlxtend.frequent_patterns import apriori, association_rules
+from mpl_toolkits.mplot3d import Axes3D
+import pyfpgrowth
 
 tienda = [['pan', 'leche', 'mantequilla', 'cerveza'],
           ['pan', 'mantequilla', 'agua', 'mermelada', 'cerveza'],
@@ -113,7 +114,49 @@ def guardarImagenId3(id3):
     plot_tree(id3, filled=True)
     plt.title("Arbol ID3")
     plt.savefig('static/img/id3.png')
-    #plt.close()
+
+
+def make_meshgrid(x, y, h=.02):
+    x_min, x_max = x.min() - 1, x.max() + 1
+    y_min, y_max = y.min() - 1, y.max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                         np.arange(y_min, y_max, h))
+    return xx, yy
+
+
+def guardarImagenSVC(X, modelo, target):
+    plt.figure()
+    modelo = modelo.fit(X, target)
+    X0, X1 = X[:, 0], X[:, 1]
+    xx, yy = make_meshgrid(X0, X1)
+    Z = modelo.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    plt.contourf(xx, yy, Z)
+    plt.scatter(X0, X1, c=target, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
+    plt.title('Maquinas de sooprte con Kernel')
+    plt.savefig('static/img/svm.png')
+
+
+def guardarImagenPCA(datos, targets):
+    fig = plt.figure(1, figsize=(4, 3))
+    plt.clf()
+    ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
+    plt.cla()
+    for label in targets:
+        ax.text3D(datos[targets == label, 0].mean(),
+                  datos[targets == label, 1].mean() + 1.5,
+                  datos[targets == label, 2].mean(), label,
+                  horizontalalignment='center',
+                  bbox=dict(alpha=.5, edgecolor='w', facecolor='w'))
+    # Reorder the labels to have colors matching the cluster results
+    y = np.choose(targets, [1, 2, 0]).astype(np.float)
+    ax.scatter(datos[:, 0], datos[:, 1], datos[:, 2], c=y, cmap=plt.cm.nipy_spectral,
+               edgecolor='k')
+    ax.w_xaxis.set_ticklabels([])
+    ax.w_yaxis.set_ticklabels([])
+    ax.w_zaxis.set_ticklabels([])
+    plt.title('PCA con 3 caracteristicas')
+    plt.savefig('static/img/pca.png')
 
 
 def knn(id, principal):
@@ -243,3 +286,109 @@ def Apriori(id, principal):
         context = {'algoritmoComparar': 'Regresión Lineal', 'resultado2': avgReal, 'pasos2': pasos,
                    'reglas2': reglas, 'img2': 'No aplica'}
     return context
+
+
+def markov(id, principal):
+    pasos = "Datos cargados " + '\n'
+    if id == 8:
+        states = ['Dormir', 'Comer', 'Trabajar']
+        probaInic = [0.35, 0.35, 0.3]
+    else:
+        states = ['Verbo', 'Sustantivo', 'Adjetivo', 'Determinante']
+        probaInic = [0.35, 0.30, 0.20, 0.15]
+    state_space = pd.Series(probaInic, index=states, name='states')
+    dataset = pd.DataFrame(columns=states, index=states)
+    for i in range(0, len(states)):
+        array = np.random.random(len(states))
+        array = array / np.sum(array)
+        dataset.loc[states[i]] = array
+    edges = {}
+    for col in dataset.columns:
+        for idx in dataset.index:
+            edges[(idx, col)] = dataset.loc[idx, col]
+    pasos += "Estados: " + '\n' + str(state_space) + '\n'
+    pasos += "Transiciones: " + '\n' + str(edges) + '\n'
+    reglas = str(dataset)
+    if principal:
+        context = {'algoritmoPrincipal': 'Modelos Ocultos de Markov', 'resultado': 'No aplica', 'pasos': pasos,
+                   'reglas': reglas, 'img': 'No aplica'}
+    else:
+        context = {'algoritmoComparar': 'Regresión Lineal', 'resultado2': 'No aplica', 'pasos2': pasos,
+                   'reglas2': reglas, 'img2': 'No aplica'}
+    return context
+
+
+def Svm(id, principal):
+    pasos = "Dataset Cargado" + '\n'
+    dataset = pickdataset(int(id))
+    datosX = dataset.data[:, :2]
+    modelo = svm.SVC(kernel='rbf', gamma=0.7, C=1)
+    entrenar = modelo.fit(dataset.data, dataset.target)
+    guardarImagenSVC(datosX, modelo, dataset.target)
+    pasos += "Vectores de soporte: " + '\n'
+    pasos += str(modelo.support_vectors_) + '\n'
+    pasos += "Soporte:" + '\n'
+    pasos += str(modelo.support_) + '\n'
+    reglas = "Funcion de desición:" + '\n'
+    reglas += str(entrenar.decision_function(datosX)) + '\n'
+    avgReal = str(entrenar.score(datosX, dataset.target) * 100) + '%'
+    img = "svm.png"
+    if principal:
+        context = {'algoritmoPrincipal': 'Maquinas de Soporte Vectorial', 'resultado': avgReal, 'pasos': pasos,
+                   'reglas': reglas, 'img': img}
+    else:
+        context = {'algoritmoComparar': 'Maquinas de Soporte Vectorial', 'resultado2': avgReal, 'pasos2': pasos,
+                   'reglas2': reglas, 'img2': img}
+    return context
+
+
+def pca(id, principal):
+    pasos = "Datos cargados" + '\n'
+    dataset = pickdataset(int(id))
+    modelo = decomposition.PCA(n_components=3)
+    modelo.fit(dataset.data)
+    guardarImagenPCA(dataset.data, dataset.target)
+    pasos += "Componentes: " + '\n' + str(modelo.n_components) + '\n'
+    pasos += "Componentes: " + '\n' + str(modelo.components_) + '\n'
+    pasos += "Covarianza: " + '\n' + str(modelo.get_covariance()) + '\n'
+    pasos += "Varianza explicada: " + '\n' + str(modelo.explained_variance_ ) + '\n'
+    pasos += "Presicion: " + '\n' + str(modelo.get_precision()) + '\n'
+    avgReal = str(modelo.score(dataset.data, dataset.target)) + '#'
+    reglas = "Precisión:" + '\n'
+    reglas += str(modelo.get_precision()) + '\n'
+    img = 'pca.png'
+    if principal:
+        context = {'algoritmoPrincipal': 'PCA', 'resultado': avgReal, 'pasos': pasos,
+                   'reglas': reglas, 'img': img}
+    else:
+        context = {'algoritmoComparar': 'PCA', 'resultado2': avgReal, 'pasos2': pasos,
+                   'reglas2': reglas, 'img2': img}
+    return context
+
+
+def fpgrouth(id, principal):
+    pasos = "Dataset Cargado" + '\n'
+    dataset = pickdataset(int(id))
+    patterns = pyfpgrowth.find_frequent_patterns(dataset, 3)
+    rules = pyfpgrowth.generate_association_rules(patterns, 0.6)
+    pasos += "Encuentros: " + '\n'
+    pasos += str(patterns) + '\n'
+    avgReal = 0
+    for i in rules.values():
+        it = i[1:2]
+        x = str(it)
+        x1 = x.split(',')
+        x2 = str(x1[0])
+        x3 = x2.split('(')
+        avgReal += float(x3[1])
+    avgReal = str((avgReal / len(rules.values())) * 100) + '% Confianza'
+    reglas = str(rules)
+    img = 'No aplica'
+    if principal:
+        context = {'algoritmoPrincipal': 'FP-growth', 'resultado': avgReal, 'pasos': pasos,
+                   'reglas': reglas, 'img': img}
+    else:
+        context = {'algoritmoComparar': 'FP-growth', 'resultado2': avgReal, 'pasos2': pasos,
+                   'reglas2': reglas, 'img2': img}
+    return context
+

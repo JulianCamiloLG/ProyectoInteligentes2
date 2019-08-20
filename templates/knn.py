@@ -169,3 +169,152 @@ support = rules[['support']]
 #print(support)
 #print(confidence)
 
+import numpy as np
+import pandas as pd
+import networkx as nx
+
+import matplotlib.pyplot as plt
+
+# create state space and initial state probabilities
+
+states = ['sleeping', 'eating', 'working']
+pi = [0.35, 0.35, 0.3]
+state_space = pd.Series(pi, index=states, name='states')
+print(state_space)
+print(state_space.sum())
+
+q_df = pd.DataFrame(columns=states, index=states)
+q_df.loc[states[0]] = [0.4, 0.2, 0.4]
+q_df.loc[states[1]] = [0.45, 0.45, 0.1]
+q_df.loc[states[2]] = [0.45, 0.25, .3]
+
+print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+print(q_df)
+
+q = q_df.values
+print("##########################################")
+print('\n', q, q.shape, '\n')
+print(q_df.sum(axis=1))
+
+
+from pprint import pprint
+
+# create a function that maps transition probability dataframe
+# to markov edges and weights
+
+def _get_markov_edges(Q):
+    edges = {}
+    for col in Q.columns:
+        for idx in Q.index:
+            edges[(idx,col)] = Q.loc[idx,col]
+    return edges
+
+edges_wts = _get_markov_edges(q_df)
+pprint(edges_wts)
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import svm, datasets
+
+
+def make_meshgrid(x, y, h=.02):
+    """Create a mesh of points to plot in
+
+    Parameters
+    ----------
+    x: data to base x-axis meshgrid on
+    y: data to base y-axis meshgrid on
+    h: stepsize for meshgrid, optional
+
+    Returns
+    -------
+    xx, yy : ndarray
+    """
+    x_min, x_max = x.min() - 1, x.max() + 1
+    y_min, y_max = y.min() - 1, y.max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                         np.arange(y_min, y_max, h))
+    return xx, yy
+
+# import some data to play with
+iris = datasets.load_iris()
+# Take the first two features. We could avoid this by using a two-dim dataset
+X = iris.data[:, :2]
+y = iris.target
+
+# we create an instance of SVM and fit out data. We do not scale our
+# data since we want to plot the support vectors
+C = 1.0  # SVM regularization parameter
+modelo = svm.SVC(kernel='rbf', gamma=0.7, C=C)
+entrenar = modelo.fit(X, y)
+title='Maquina con Kernel rbf'
+
+# Set-up 2x2 grid for plotting.
+plt.figure()
+X0, X1 = X[:, 0], X[:, 1]
+xx, yy = make_meshgrid(X0, X1)
+Z = modelo.predict(np.c_[xx.ravel(), yy.ravel()])
+Z = Z.reshape(xx.shape)
+out = plt.contourf(xx, yy, Z)
+plt.scatter(X0, X1, c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
+plt.title(title)
+
+
+from sklearn import decomposition
+from mpl_toolkits.mplot3d import Axes3D
+
+centers = [[1, 1], [-1, -1], [1, -1]]
+iris = datasets.load_wine()
+X = iris.data
+y = iris.target
+
+fig = plt.figure(1, figsize=(4, 3))
+plt.clf()
+ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
+
+plt.cla()
+pca = decomposition.PCA(n_components=3)
+pca.fit(X)
+X = pca.transform(X)
+
+for label in y:
+    ax.text3D(X[y == label, 0].mean(),
+              X[y == label, 1].mean() + 1.5,
+              X[y == label, 2].mean(),label,
+              horizontalalignment='center',
+              bbox=dict(alpha=.5, edgecolor='w', facecolor='w'))
+# Reorder the labels to have colors matching the cluster results
+y = np.choose(y, [1, 2, 0]).astype(np.float)
+ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=y, cmap=plt.cm.nipy_spectral,
+           edgecolor='k')
+ax.w_xaxis.set_ticklabels([])
+ax.w_yaxis.set_ticklabels([])
+ax.w_zaxis.set_ticklabels([])
+plt.savefig('pca.png')
+
+
+import pyfpgrowth
+transactions = [['Leche', 'Cebolla', 'Nuez Moscada', 'Frijoles', 'Huevos', 'Yogurt'],
+           ['Cilantro', 'Cebolla', 'Nuez Moscada', 'Frijoles', 'Huevos', 'Yogurt'],
+           ['Leche', 'Manzana', 'Frijoles', 'Huevos'],
+           ['Leche', 'Maiz dulce', 'Maiz', 'Frijoles', 'Yogurt'],
+           ['Maiz', 'Cebolla', 'Cebolla', 'Frijoles', 'Helado', 'Huevos']]
+
+patterns = pyfpgrowth.find_frequent_patterns(transactions, 3)
+rules = pyfpgrowth.generate_association_rules(patterns, 0.6)
+
+print(rules)
+print("""""""""""""""""""""""""""""")
+print(patterns)
+print("                              ")
+x4=0
+for i in rules.values():
+    it = i[1:2]
+    x = str(it)
+    x1 = x.split(',')
+    x2 = str(x1[0])
+    x3 = x2.split('(')
+    x4 += float(x3[1])
+    print(x3[1])
+print(x4/len(rules.values()))
