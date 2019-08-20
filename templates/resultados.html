@@ -27,7 +27,7 @@ Mostrando resultados de:
         <div class="col-xs-4 mx-2">
             <h5>Imagen: </h5> <br>
             <a href="/static/img/{{ img }}">
-                <img src="{% static 'img/'  %}{{ img }}" alt="img" class="img-fluid" width="350px" height="400px">
+                <img src="{% static 'img/'  %}{{ img }}" alt="{{ img }}" class="img-fluid" width="700px" height="500px">
             </a>
         </div>
         <div class="col-xs-4 mx-2">
@@ -36,7 +36,7 @@ Mostrando resultados de:
         </div>
         <div class="col-xs-4 mx-2">
             <h5>Reglas:</h5> <br>
-            <textarea name="text" id="reglas" cols="30" rows="10" placeholder="">{{ reglas }}</textarea>
+            <textarea name="text" id="reglas" cols="60" rows="20" placeholder="">{{ reglas }}</textarea>
         </div>
     </div>
     <hr align="center" noshade="noshade" size="10" width="95%" />

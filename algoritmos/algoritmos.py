@@ -11,7 +11,22 @@ from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.tree.export import export_text
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, r2_score
+import pandas as pd
+from mlxtend.preprocessing import OnehotTransactions
+from mlxtend.frequent_patterns import apriori
+from mlxtend.frequent_patterns import association_rules
 
+tienda = [['pan', 'leche', 'mantequilla', 'cerveza'],
+          ['pan', 'mantequilla', 'agua', 'mermelada', 'cerveza'],
+          ['cerveza', 'pañales', 'pan', 'mantequilla', 'mermelada'],
+          ['mantequilla', 'leche', 'jugo'],
+          ['pañales', 'cerveza', 'jugo', 'agua']]
+
+ketchap = [['Leche', 'Cebolla', 'Nuez Moscada', 'Frijoles', 'Huevos', 'Yogurt'],
+           ['Cilantro', 'Cebolla', 'Nuez Moscada', 'Frijoles', 'Huevos', 'Yogurt'],
+           ['Leche', 'Manzana', 'Frijoles', 'Huevos'],
+           ['Leche', 'Maiz dulce', 'Maiz', 'Frijoles', 'Yogurt'],
+           ['Maiz', 'Cebolla', 'Cebolla', 'Frijoles', 'Helado', 'Huevos']]
 
 def pickdataset(id):
     dataset = None
@@ -25,6 +40,10 @@ def pickdataset(id):
         dataset = datasets.load_diabetes()
     elif id == 5:
         dataset = datasets.load_digits()
+    elif id == 6:
+        dataset = tienda
+    elif id == 7:
+        dataset = ketchap
     return dataset
 
 
@@ -202,3 +221,25 @@ def regresionLineal(id, principal):
     return context
 
 
+def Apriori(id, principal):
+    pasos = "Dataset cargado" + '\n'
+    dataset = pickdataset(int(id))
+    oht = OnehotTransactions()
+    oht_ary = oht.fit(dataset).transform(dataset)
+    df = pd.DataFrame(oht_ary, columns=oht.columns_)
+    frequent_itemsets = apriori(df, min_support=0.6, use_colnames=True)
+    association_rules(frequent_itemsets, metric="confidence", min_threshold=0.7)
+    rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.2)
+    pasos += "Dataset Procesado: " + '\n'
+    pasos += str(df) + '\n'
+    pasos += "Item Set: " + '\n'
+    pasos += str(frequent_itemsets) + '\n'
+    avgReal = str(np.mean(rules.as_matrix(columns=['support'])) * 100) + "% soporte promedio"
+    reglas = rules[['antecedents', 'consequents', 'support']]
+    if principal:
+        context = {'algoritmoPrincipal': 'Apriori', 'resultado': avgReal, 'pasos': pasos,
+                   'reglas': reglas, 'img': 'No aplica'}
+    else:
+        context = {'algoritmoComparar': 'Regresión Lineal', 'resultado2': avgReal, 'pasos2': pasos,
+                   'reglas2': reglas, 'img2': 'No aplica'}
+    return context

@@ -138,6 +138,34 @@ plt.plot(diabetes_X_test, diabetes_y_pred, color='blue', linewidth=3)
 plt.xticks(())
 plt.yticks(())
 
-plt.show()
+#plt.show()
 
-plt.show()
+dataset = [['Milk', 'Onion', 'Nutmeg', 'Kidney Beans', 'Eggs', 'Yogurt'],
+           ['Dill', 'Onion', 'Nutmeg', 'Kidney Beans', 'Eggs', 'Yogurt'],
+           ['Milk', 'Apple', 'Kidney Beans', 'Eggs'],
+           ['Milk', 'Unicorn', 'Corn', 'Kidney Beans', 'Yogurt'],
+           ['Corn', 'Onion', 'Onion', 'Kidney Beans', 'Ice cream', 'Eggs']]
+
+import pandas as pd
+from mlxtend.preprocessing import OnehotTransactions
+from mlxtend.frequent_patterns import apriori
+
+oht = OnehotTransactions()
+oht_ary = oht.fit(dataset).transform(dataset)
+df = pd.DataFrame(oht_ary, columns=oht.columns_)
+print(df)
+
+frequent_itemsets = apriori(df, min_support=0.6, use_colnames=True)
+print(frequent_itemsets)
+
+from mlxtend.frequent_patterns import association_rules
+
+association_rules(frequent_itemsets, metric="confidence", min_threshold=0.7)
+rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.2)
+print(rules[['antecedents', 'consequents', 'support']])
+support = rules[['support']]
+#support = rules.as_matrix(columns=['support'])
+#confidence = rules.as_matrix(columns=['confidence'])
+#print(support)
+#print(confidence)
+
