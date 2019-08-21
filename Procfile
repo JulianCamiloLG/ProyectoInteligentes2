@@ -1,0 +1,1 @@
+web: gunicorn sistemasinteligentes2.wsgi --log-file -
