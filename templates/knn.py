@@ -318,3 +318,12 @@ for i in rules.values():
     x4 += float(x3[1])
     print(x3[1])
 print(x4/len(rules.values()))
+
+try:
+    archivo = request.FILES['datasetfile']
+    dataset = leerDataset(archivo)
+    print(dataset)
+except:
+    pass
+print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+print(dataset)

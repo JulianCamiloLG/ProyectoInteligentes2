@@ -28,7 +28,7 @@ Elija las opciones que más se le acomoden
                     </optgroup>
                     <optgroup label="Reglas de Asociaciones">
                         <option value="apriori">Apriori</option>
-                        <option value="fpgrotuh">FP-Grouth</option>
+                        <option value="fpgrouth">FP-Grouth</option>
                     </optgroup>
                     <optgroup label="Markov">
                         <option value="hmm">Modelos ocultos de Markov</option>
@@ -43,6 +43,7 @@ Elija las opciones que más se le acomoden
             <div class="col-xs-5 float-right">
                 <select name="dataset" id="dataset">
                     <optgroup label="Clasificadores Supervisados">
+                        <option value="0">Ninguno</option>
                         <option value="1">Vino</option>
                         <option value="2">Cancer de Máma</option>
                         <option value="3">Iris</option>
@@ -66,7 +67,7 @@ Elija las opciones que más se le acomoden
                 <label>Cargar DataSet: </label>
             </div>
             <div class="col-xs-5 float-right">
-                <input class="" type="file">Cargar (opcional)</input>
+                <input class="" type="file" name="datasetfile" id="datasetfile">Cargar (opcional)</input>
             </div>
         </div>
         <div class="row  my-3">

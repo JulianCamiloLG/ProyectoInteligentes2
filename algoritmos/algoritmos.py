@@ -16,6 +16,7 @@ from mlxtend.preprocessing import OnehotTransactions
 from mlxtend.frequent_patterns import apriori, association_rules
 from mpl_toolkits.mplot3d import Axes3D
 import pyfpgrowth
+from sklearn import preprocessing
 
 tienda = [['pan', 'leche', 'mantequilla', 'cerveza'],
           ['pan', 'mantequilla', 'agua', 'mermelada', 'cerveza'],
@@ -29,28 +30,34 @@ ketchap = [['Leche', 'Cebolla', 'Nuez Moscada', 'Frijoles', 'Huevos', 'Yogurt'],
            ['Leche', 'Maiz dulce', 'Maiz', 'Frijoles', 'Yogurt'],
            ['Maiz', 'Cebolla', 'Cebolla', 'Frijoles', 'Helado', 'Huevos']]
 
-def pickdataset(id):
+
+def pickdataset(id, datos):
     dataset = None
-    if id == 1:
-        dataset = datasets.load_wine()
-    elif id == 2:
-        dataset = datasets.load_breast_cancer()
-    elif id == 3:
-        dataset = datasets.load_iris()
-    elif id == 4:
-        dataset = datasets.load_diabetes()
-    elif id == 5:
-        dataset = datasets.load_digits()
-    elif id == 6:
-        dataset = tienda
-    elif id == 7:
-        dataset = ketchap
+    if id is not 0:
+        if id == 1:
+            dataset = datasets.load_wine()
+        elif id == 2:
+            dataset = datasets.load_breast_cancer()
+        elif id == 3:
+            dataset = datasets.load_iris()
+        elif id == 4:
+            dataset = datasets.load_diabetes()
+        elif id == 5:
+            dataset = datasets.load_digits()
+        elif id == 6:
+            dataset = tienda
+        elif id == 7:
+            dataset = ketchap
+    else:
+        labels = list(datos.columns.values)
+        ndatos = datos.loc[:, datos.keys()]
+        target = datos.pop(labels[len(labels)-1])
     return dataset
 
 
-def bayesA(id, principal):
+def bayesA(id, datos, principal):
     gnb = GaussianNB()
-    dataset = pickdataset(int(id))
+    dataset = pickdataset(int(id), datos)
     pasos = "DataSet cargado: iris" + '\n'
     y_pred = gnb.fit(dataset.data, dataset.target).predict(dataset.data)
     matrizPorcentaje = metrics.classification_report(dataset.target, y_pred)
@@ -58,22 +65,22 @@ def bayesA(id, principal):
     avgReal = str(metrics.accuracy_score(dataset.target, y_pred) * 100) + '%'
     pasos += "Target: " + '\n' + str(dataset.target) + '\n'
     pasos += "Resultados: " + '\n' + str(y_pred) + '\n'
-    pasos += "Matriz de porcentajes: " + '\n' + matrizPorcentaje + '\n'
+    reglas = "Matriz de porcentajes: " + '\n' + matrizPorcentaje + '\n'
     pasos += "Matriz de confución: " + '\n' + str(confusion) + '\n'
     if principal:
-        context = {'algoritmoPrincipal': 'Naive Bayes', 'resultado': avgReal, 'pasos': pasos, 'reglas': 'No aplica'}
+        context = {'algoritmoPrincipal': 'Naive Bayes', 'resultado': avgReal, 'pasos': pasos, 'reglas': reglas, 'img': 'No aplica'}
     else:
-        context = {'algoritmoComparar': 'Naive Bayes', 'resultado2': avgReal, 'pasos2': pasos, 'reglas2': 'No aplica', 'img2': 'No aplica'}
+        context = {'algoritmoComparar': 'Naive Bayes', 'resultado2': avgReal, 'pasos2': pasos, 'reglas2': reglas, 'img2': 'No aplica'}
     return context
 
 
-def guardarImagenKnn(dataset):
-    X = dataset.data[:, :2]
+def guardarImagenKnn(dataset, target):
+    X = dataset[:, :2]
     h = .02
     cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
     cmap_bold = ListedColormap(['#FF0000', '#00FF00', '#0000FF'])
     knn = KNeighborsClassifier()
-    knn.fit(X, dataset.target)
+    knn.fit(X, target)
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
@@ -82,7 +89,7 @@ def guardarImagenKnn(dataset):
     Z = Z.reshape(xx.shape)
     plt.figure()
     plt.pcolormesh(xx, yy, Z, cmap=cmap_light)
-    plt.scatter(X[:, 0], X[:, -1], c=dataset.target, cmap=cmap_bold)
+    plt.scatter(X[:, 0], X[:, -1], c=target, cmap=cmap_bold)
     plt.title('Resultado KNN')
     plt.savefig('static/img/knn.png')
     #plt.close()
@@ -159,9 +166,9 @@ def guardarImagenPCA(datos, targets):
     plt.savefig('static/img/pca.png')
 
 
-def knn(id, principal):
+def knn(id, datos, principal):
     pasos = "Dataset cargado" + '\n'
-    dataset = pickdataset(int(id))
+    dataset = pickdataset(int(id), datos)
     knn = KNeighborsClassifier()
     knn.fit(dataset.data, dataset.target)
     y_pred = knn.predict(dataset.data)
@@ -184,9 +191,9 @@ def knn(id, principal):
     return context
 
 
-def kmeans(id, principal):
+def kmeans(id, dataset, principal):
     pasos = "Dataset cargado" + '\n'
-    dataset = pickdataset(int(id))
+    dataset = pickdataset(int(id), dataset)
     kmeans = KMeans(n_clusters=4, max_iter=3000, algorithm='auto', random_state=0)
     kmeans.fit(dataset.data)
     y_pred = kmeans.predict(dataset.data)
@@ -207,9 +214,11 @@ def kmeans(id, principal):
     return context
 
 
-def id3(id, principal):
+def id3(id, dataset1, principal):
     pasos = "Dataset cargado" + '\n'
-    dataset = pickdataset(int(id))
+    dataset = pickdataset(int(id), dataset1)
+    print(dataset.data)
+    print(dataset.target)
     decision_tree = DecisionTreeClassifier(random_state=0)
     decision_tree = decision_tree.fit(dataset.data, dataset.target)
     guardarImagenId3(decision_tree)
@@ -233,9 +242,9 @@ def id3(id, principal):
     return context
 
 
-def regresionLineal(id, principal):
+def regresionLineal(id, dataset, principal):
     pasos = "Dataset cargado" + '\n'
-    dataset = pickdataset(int(id))
+    dataset = pickdataset(int(id), dataset)
     datos = dataset.data[:, np.newaxis, 2]
     xTrain =datos[:-20]
     xTest = datos[-20:]
@@ -264,9 +273,9 @@ def regresionLineal(id, principal):
     return context
 
 
-def Apriori(id, principal):
+def Apriori(id, dataset, principal):
     pasos = "Dataset cargado" + '\n'
-    dataset = pickdataset(int(id))
+    dataset = pickdataset(int(id), dataset)
     oht = OnehotTransactions()
     oht_ary = oht.fit(dataset).transform(dataset)
     df = pd.DataFrame(oht_ary, columns=oht.columns_)
@@ -288,9 +297,9 @@ def Apriori(id, principal):
     return context
 
 
-def markov(id, principal):
+def markov(id, dataset, principal):
     pasos = "Datos cargados " + '\n'
-    if id == 8:
+    if id == '8':
         states = ['Dormir', 'Comer', 'Trabajar']
         probaInic = [0.35, 0.35, 0.3]
     else:
@@ -318,9 +327,9 @@ def markov(id, principal):
     return context
 
 
-def Svm(id, principal):
+def Svm(id, dataset, principal):
     pasos = "Dataset Cargado" + '\n'
-    dataset = pickdataset(int(id))
+    dataset = pickdataset(int(id), dataset)
     datosX = dataset.data[:, :2]
     modelo = svm.SVC(kernel='rbf', gamma=0.7, C=1)
     entrenar = modelo.fit(dataset.data, dataset.target)
@@ -342,9 +351,9 @@ def Svm(id, principal):
     return context
 
 
-def pca(id, principal):
+def pca(id, dataset, principal):
     pasos = "Datos cargados" + '\n'
-    dataset = pickdataset(int(id))
+    dataset = pickdataset(int(id), dataset)
     modelo = decomposition.PCA(n_components=3)
     modelo.fit(dataset.data)
     guardarImagenPCA(dataset.data, dataset.target)
@@ -366,9 +375,9 @@ def pca(id, principal):
     return context
 
 
-def fpgrouth(id, principal):
+def fpgrouth(id, dataset,  principal):
     pasos = "Dataset Cargado" + '\n'
-    dataset = pickdataset(int(id))
+    dataset = pickdataset(int(id), dataset)
     patterns = pyfpgrowth.find_frequent_patterns(dataset, 3)
     rules = pyfpgrowth.generate_association_rules(patterns, 0.6)
     pasos += "Encuentros: " + '\n'
